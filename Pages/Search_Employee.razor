@@ -1,0 +1,204 @@
+﻿@*Group Number - 12
+    Group members name - Princejot Singh, Preetinder Singh, Jashanpreet Singh Sran and Rudra Kainth
+    Submitted to - Prof. Harjinder Kaur
+    Project Title - Employee Registration App
+    Date of Submittion - 10th of December, 2023
+*@
+@*Name of page is search_employee*@
+@page "/search_employee"
+@using Final_Project.Data
+
+<div class="container-fluid">
+    <center><h2>Search Employee</h2></center>
+
+    <!-- On based of criteris form will search for employees -->
+    <div class="mb-3 mt-3">
+        <form>
+            <div class="row">
+                <div class="col">EmployeeID:</div>
+                <div class="col">Phone Number:</div>
+                <div class="col">First Name:</div>
+            </div>
+            <div class="row">
+                <div class="col"><input type="number" class="form-control" placeholder="EmployeeID" @bind="Id1"></div>
+                <div class="col"><input type="number" class="form-control" max=9999999999 min=1000000000 required placeholder="Phone Number" @bind="Phone1"></div>
+                <div class="col"><input type="text" class="form-control" max="45" placeholder="First Name" @bind="First_Name1"></div>
+            </div>
+            <div class="row"><center><button type="button" class="btn btn-primary mb-3 mt-3" @onclick="Search">Find Employee</button></center></div>
+        </form>
+    </div>
+
+    <!-- This will display search results in form of a list -->
+    <center><h3>Employees</h3></center>
+    <div class="list-group mb-2">
+        @if (visible_List.Count() != 0)
+        {
+            @foreach (var line in visible_List)
+            {
+                <a class="list-group-item list-group-item-action" @onclick="() => load_data(line)" style="cursor:pointer">@line</a>
+            }
+        }
+        else
+        {
+            <a class="list-group-item list-group-item-action">There is no Employee with these details</a>
+        }
+    </div>
+
+    <!-- Over here it will display employee details for editing -->
+    <center><h3>Employee Data</h3></center>
+    <div class=" mb-3 mt-3">
+        <form class="was-validated">
+            <!-- Inputting fields for employee details -->
+            <div class="input-group mb-3 mt-3">
+                <span class="input-group-text">First Name</span>
+                <input type="text" class="form-control" id="First_Name" placeholder="Enter First Name" name="First_Name" required maxlength="45" @bind="First_Name">
+                <div class="valid-feedback">Valid</div>
+                <div class="invalid-feedback">Please enter your First Name</div>
+            </div>
+
+            <!-- Fields for Last Name-->
+            <div class="input-group mb-3 mt-3">
+                <span class="input-group-text">Last Name</span>
+                <input type="text" class="form-control" id="Last_Name" placeholder="Enter Last Name" name="Last_Name" required maxlength="45" @bind="Last_Name">
+                <div class="valid-feedback">Valid</div>
+                <div class="invalid-feedback">Please enter your Last name</div>
+            </div>
+
+            <!-- Fields for Date OF Birth-->
+            <div class="input-group mb-3 mt-3">
+                <span class="input-group-text">Date of Birth</span>
+                <input type="date" class="form-control" id="date_of_birth" placeholder="Enter your Date of Birth" name="date_of_birth" required max="2005-12-31" min="1900-01-01" @bind="dob">
+                <div class="valid-feedback">Valid</div>
+                <div class="invalid-feedback">Please enter your Date of Birth (It should be Before 2005-12-31)</div>
+            </div>
+
+            <!-- Fields for Phone Number-->
+            <div class="input-group mt-3 mb-3">
+                <span class="input-group-text">Phone Number</span>
+                <input type="number" class="form-control" id="phone" placeholder="Enter phone number" name="phone" required min="1000000000" max=9999999999 @bind="Phone">
+                <div class="valid-feedback">Valid</div>
+                <div class="invalid-feedback">Please enter you Phone Number(Only 10 characters allowed)</div>
+            </div>
+
+            <!-- Fields for Address-->
+            <div class="input-group mb-3 mt-3">
+                <span class="input-group-text">Address</span>
+                <input type="text" class="form-control" id="Address" placeholder="Enter Address" name="Address" required maxlength="45" @bind="Address">
+                <div class="valid-feedback">Valid</div>
+                <div class="invalid-feedback">Please enter your Address(Maximum 45 characters)</div>
+            </div>
+            <!-- Buttons for updating and deleting the employee data -->
+            <div class="container-fluid mb-3 mt-3" style="gap:50px">
+                <center><button class="btn btn-primary" type="button" @onclick=" Update">Update</button><button class="btn btn-danger" type="button" @onclick="Delete" style="margin-left:50px">Delete</button></center>
+            </div>
+        </form>
+    </div>
+</div>
+
+@code{
+    // Thses are the model properties for data binding
+    public int Id { get; set; }
+    public int? Id1 { get; set; } = null;
+    public string First_Name { get; set; }
+    public string First_Name1 { get; set; } = "";
+    public string Last_Name { get; set; }
+    public DateOnly? dob { get; set; }
+    public string Phone { get; set; }
+    public string Phone1 { get; set; } = "";
+    public string Address { get; set; }
+
+    // Using database instance for data operations
+    DatabaseCode database = new DatabaseCode();
+    // List to store visible search results
+    List<Employee> visible_List = new List<Employee>();
+
+    // This is a method called during component initialization to get initial data
+    protected override void OnInitialized()
+    {
+        GetData();
+    }
+
+    // Over here this method to retrieve data from the database
+    public void GetData()
+    {
+        visible_List = database.Select();
+    }
+
+    // To search for employees based on criteria this method will be used
+    public void Search()
+    {
+        try
+        {
+            if (First_Name1 == "" && Id1 == null && Phone1 == "")
+            {
+                // If no specific criteria or agenda, get complete data
+                GetData();
+            }
+            else
+            {
+                // Clear current results and filter based on criteria
+                visible_List.Clear();
+                foreach (var line in database.Select().Where(a => a.employeeID == Id1 || a.phone == Phone1 || a.first_name.ToLower() == First_Name1.ToLower()))
+                { visible_List.Add(line); }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Problem in Search Employee in Search is: " + ex);
+        }
+    }
+
+    // For Editing data this method to load employee data is used
+    public void load_data(Employee employee)
+    {
+        try
+        {
+            Id = employee.employeeID;
+            First_Name = employee.first_name;
+            Last_Name = employee.last_name;
+            dob = employee.dob;
+            Phone = employee.phone;
+            Address = employee.address;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Problem in Load Data is: " + ex);
+        }
+    }
+
+    // This method is used to clear form fields
+    public void Clear()
+    {
+        Id = 0;
+        First_Name = "";
+        Last_Name = "";
+        dob = null;
+        Phone = "";
+        Address = "";
+    }
+
+    // This method is used to update employee data
+    public void Update()
+    {
+        try
+        {
+            database.Update(Id, First_Name, Last_Name, dob, Phone, Address);
+            // Refreshing of data and clearing form fields after updating
+            GetData();
+            Clear();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error in Search Employee Update is: " + ex);
+        }
+    }
+
+    // Method to delete employee data
+    public void Delete()
+    {
+        database.Delete(Id);
+        // Refreshing data and clearing form fields after deleting
+        GetData();
+        Clear();
+    }
+}

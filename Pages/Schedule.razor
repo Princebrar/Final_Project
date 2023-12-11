@@ -1,0 +1,163 @@
+﻿@*Group Number - 12
+    Group members name - Princejot Singh, Preetinder Singh, Jashanpreet Singh Sran and Rudra Kainth
+    Submitted to - Prof. Harjinder Kaur
+    Project Title - Employee Registration App
+    Date of Submittion - 10th of December, 2023
+*@
+@*Name of page is schedule*@
+@page "/schedule"
+@using Final_Project.Data
+
+<div class="container-fluid">
+    <center><h2>Employee Schedule</h2></center>
+
+    <!-- Dropdown to select an employee -->
+    <div class="input-group mb-3 mt-3">
+        <span class="input-group-text">Select your Employee</span>
+        <select name="Employees" id="Employees" class="form-select" @onchange="HandleEmployeeChange">
+            <option selected disabled value="">Choose an Employee</option>
+            <option value="All">All</option>
+            @foreach (var line in visible_List)
+            {
+                <option value="@line">@line</option>
+            }
+        </select>
+    </div>
+
+    <!-- Display schedule in a table form -->
+    <center><h2>Schedule</h2></center>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Name</th>
+                <th>Task</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Display schedule data in the table -->
+            @if (visible_tab_list.Count() != 0)
+            {
+                @foreach (var line in visible_tab_list)
+                {
+                    <tr>
+                        <td>@line.Date</td>
+                        <td>@line.Name</td>
+                        <td>@line.Task1</td>
+                    </tr>
+                }
+            }
+            else
+            {
+
+                <tr>
+                    <td>Code</td>
+                    <td>is not</td>
+                    <td>Running</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    // DatabaseCode class called to do database commands
+    DatabaseCode database = new DatabaseCode();
+
+    // Lists to store employee and schedule data
+    List<Employee> visible_List = new List<Employee>();
+    List<Schedule1> table_list = new List<Schedule1>();
+    List<Schedule1> visible_tab_list = new List<Schedule1>();
+
+    // Made Selected employee variable
+    string selectedEmployee = "";
+
+    // Method called during component initialization to get initial data
+    protected override void OnInitialized()
+    {
+        GetData();
+    }
+
+    // Method to retrieve employee and schedule data from the database
+    public void GetData()
+    {
+        table_list.Clear();
+        visible_List = database.Select();
+        DateOnly date = DateOnly.FromDateTime(DateTime.Now.Date);
+        int x = 0;
+
+        // Create schedule data for each employee depending on wheather they are Manager or Software Developer or Customer Service
+        foreach (var life in visible_List)
+        {
+            string work = "";
+            if (life.job == "Manager")
+            {
+                work = "Give Tasks to all other people and see if everything is going smoothly";
+            }
+            else if (life.job == "Software Developer")
+            {
+                work = "Make the code, remove error and follow instructions of Manager";
+            }
+            else
+            {
+                work = "Answer all the queries of customers and follow instructions of seniors.";
+            }
+
+            Schedule1 data = new Schedule1(date.AddDays(x), life.employeeID, life.first_name, life.last_name, work);
+            table_list.Add(data);
+            x++;
+        }
+
+        // Copy the schedule data to the visible list for display
+        visible_tab_list.Clear();
+        foreach (var line in table_list)
+        {
+            visible_tab_list.Add(line);
+        }
+    }
+
+    // Method to handle employee selection change
+    public void HandleEmployeeChange(ChangeEventArgs e)
+    {
+        try
+        {
+            if (e.Value != null)
+            {
+                selectedEmployee = Convert.ToString(e.Value);
+                if (selectedEmployee != "All")
+                {
+                    // Load data specific to the selected employee into the variables
+                    Load_Data(selectedEmployee);
+                }
+                else
+                {
+                    // Load all data if "All" is selected
+                    GetData();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error in HandleEmployeeChange is: " + ex);
+        }
+    }
+
+    // Method to load schedule data for a specific employee into the variales
+    public void Load_Data(string y)
+    {
+        try
+        {
+            visible_tab_list.Clear();
+            //Only loads those Employees whoose ID in table_list matches what first 1 or 2 numbers in string y
+            foreach (var line in table_list.Where(a => a.Id == Convert.ToInt32(y.Split(',')[0])))
+            {
+                Console.WriteLine("Foreach command is run");
+                visible_tab_list.Add(line);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error in Load_Data in Schedule is: " + ex);
+        }
+    }
+}

@@ -1,0 +1,147 @@
+﻿@*Group Number - 12
+    Group members name - Princejot Singh, Preetinder Singh, Jashanpreet Singh Sran and Rudra Kainth
+    Submitted to - Prof. Harjinder Kaur
+    Project Title - Employee Registration App
+    Date of Submittion - 10th of December, 2023
+*@
+@*Name of page is add_employee*@
+@page "/add_employee"
+@using Final_Project.Data
+@try
+{
+    <div class="container-fluid">
+        <center><h2>Add Employee</h2></center>
+        <form class="was-validated">
+            <!-- Enter the First Name -->
+            <div class="form-floating mb-3 mt-3">
+                <input type="text" class="form-control" id="First_Name" placeholder="Enter First Name" name="First_Name" required maxlength="45" @bind="first_name">
+                <label for="First_Name">First Name</label>
+                <div class="valid-feedback">Valid</div>
+                <div class="invalid-feedback">Please enter your First Name(Only 45 Characters)</div>
+            </div>
+
+            <!-- Enter the Last Name -->
+            <div class="form-floating mb-3 mt-3">
+                <input type="text" class="form-control" id="Last_Name" placeholder="Enter Last Name" name="Last_Name" required maxlength="45" @bind="last_name">
+                <label for="Last_Name">Last Name</label>
+                <div class="valid-feedback">Valid</div>
+                <div class="invalid-feedback">Please enter your Last name(Only 45 Characters)</div>
+            </div>
+
+            <!-- Enter the Date of Birth -->
+            <div class="input-group mb-3 mt-3">
+                <span class="input-group-text">Date of Birth</span>
+                <input type="date" class="form-control" id="date_of_birth" placeholder="Enter your Date of Birth" name="date_of_birth" required max="2005-12-31" min="1900-01-01" @bind="dob">
+                <div class="valid-feedback">Valid</div>
+                <div class="invalid-feedback">Please enter your Date of Birth (It should be Before 2005-12-31)</div>
+            </div>
+
+            <!-- Enter the Phone Number -->
+            <div class="form-floating mt-3 mb-3">
+                <input type="number" class="form-control" id="phone" placeholder="Enter phone number" name="phone" required min="1000000000" max="9999999999" @bind="phone">
+                <label for="phone">Phone Number</label>
+                <div class="valid-feedback">Valid</div>
+                <div class="invalid-feedback">Please enter you Phone Number(Only 10 characters allowed)</div>
+            </div>
+
+            <!-- Dropdown menu for Gender -->
+            <div class="input-group mb-3 mt-3">
+                <span class="input-group-text">Gender</span>
+                <select class="form-select" required id="gender" @bind="gender">
+                    <option disabled selected value="">Choose Any option</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                    <option value="Choose not to Specify">Choose not to Specify</option>
+                </select>
+            </div>
+
+            <!-- Enter the Address -->
+            <div class="form-floating mb-3 mt-3">
+                <input type="text" class="form-control" id="Address" placeholder="Enter your Address" name="Address" required maxlength="45" @bind="address">
+                <label for="Address">Address</label>
+                <div class="valid-feedback">Valid</div>
+                <div class="invalid-feedback">Please enter your Address(Maximum 45 characters)</div>
+            </div>
+
+            <div class="container-fluid border">
+                <h5>Enter the job that you are applying for:</h5>
+                <!-- Radio buttons for job options -->
+                <div class="form-check mb-3 mt-3">
+                    <input type="radio" class="form-check-input" id="radio1" name="optradio" value="option1" @onclick='() => fillinfo_job("Software Developer")' required>Software Developer
+                    <label class="form-check-label" for="radio1"></label>
+                </div>
+                <div class="form-check mb-3 mt-3">
+                    <input type="radio" class="form-check-input" id="radio2" name="optradio" value="option2" @onclick='() => fillinfo_job("Manager")'>Manager
+                </div>
+                <div class="form-check mb-3 mt-3">
+                    <input type="radio" class="form-check-input" name="optradio" @onclick='() => fillinfo_job("Customer Service")'>Customer Service
+                    <label class="form-check-label"></label>
+                    <div class="valid-feedback">Valid</div>
+                    <div class="invalid-feedback">Please Select One Option</div>
+                </div>
+            </div>
+            <div class="container-fluid" style="gap:50px">
+            <center>
+                <!-- Submit and Clear buttons -->
+                <button type="button" class="btn btn-primary mb-3 mt-3" @onclick='Submit'>Submit</button>
+                <button type="reset" class="btn btn-danger mb-3 mt-3" style="margin-left:50px">Clear</button>
+            </center>
+                </div>
+        </form>
+    </div>
+}
+catch (Exception ex)
+{
+    // Writes down the error if it comes while rendering the page
+    Console.WriteLine("Error in HTML is: " + ex);
+}
+
+@code{
+    // Putting Getters and Setters
+    public string first_name { get; set; }
+    public string last_name { get; set; }
+    public DateOnly? dob { get; set; } = null;
+    public string phone { get; set; }
+    public string gender { get; set; }
+    public string job { get; set; }
+    public string address { get; set; }
+
+    // Method that puts value of Radio button in job 
+    public void fillinfo_job(string job_input)
+    {
+        job = job_input;
+    }
+
+    // DatabaseCode class is called to run Database Commands
+    DatabaseCode Database = new DatabaseCode();
+
+    // Method to clear form fields
+    public void Clear()
+    {
+        first_name = "";
+        last_name = "";
+        dob = null;
+        phone = "";
+        gender = "";
+        job = "";
+        address = "";
+    }
+
+    // Method to submit form data to the database
+    public void Submit()
+    {
+        try
+        {
+            // Insert data into the database
+            Database.Insert(first_name, last_name, dob, phone, gender, job, address);
+            // Clear form fields after submission
+            Clear();
+        }
+        catch (Exception ex)
+        {
+            // Print any error messages that occur during submission
+            Console.WriteLine("Error in Counter page Code: " + ex);
+        }
+    }
+}
